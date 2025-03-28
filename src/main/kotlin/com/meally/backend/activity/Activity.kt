@@ -1,19 +1,22 @@
-package com.meally.backend.mealType
+package com.meally.backend.activity
 
 import com.meally.backend.common.baseModel.BaseModel
 import com.meally.backend.imageResource.ImageResource
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
+import jakarta.persistence.*
+import java.util.*
 
 @Entity
-data class MealType(
+data class Activity(
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    val id: UUID? = null,
+
     val name: String,
-    val orderInDay: Int,
+
+    val caloriesBurntPerHour: Double,
 
     @ManyToOne
     @JoinColumn(name = "image_id")
     val image: ImageResource? = null,
+
 ) : BaseModel()

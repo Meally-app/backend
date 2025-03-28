@@ -1,14 +1,13 @@
-package com.meally.backend.food
+package com.meally.backend.weight
 
 import com.meally.backend.common.baseModel.BaseModel
-import com.meally.backend.mealType.MealType
 import com.meally.backend.users.User
 import jakarta.persistence.*
 import java.time.LocalDate
 import java.util.*
 
 @Entity
-data class FoodEntry(
+data class UserWeight(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID? = null,
@@ -17,17 +16,7 @@ data class FoodEntry(
     @JoinColumn(name = "user_id", nullable = false)
     val user: User,
 
-    @ManyToOne
-    @JoinColumn(name = "food_id", nullable = false)
-    val food: Food,
-
-    @ManyToOne
-    @JoinColumn(name = "meal_type_id", nullable = false)
-    val mealType: MealType,
-
-    val amountInGrams: Double,
-
-    val quantity: Double,
+    val weight: Double,
 
     val date: LocalDate,
 

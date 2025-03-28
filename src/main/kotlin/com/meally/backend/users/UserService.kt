@@ -1,5 +1,6 @@
 package com.meally.backend.users
 
+import com.meally.backend.imageResource.ImageResource
 import org.springframework.stereotype.Service
 
 @Service
@@ -20,7 +21,10 @@ class UserService (
                 externalId = externalId,
                 username = name ?: email, // default the username to be the same as email
                 email = email,
-                profilePicUrl = pictureUrl,
+                profileImage = ImageResource(
+                    name = "${email}_profile_pic",
+                    resourceUrl = pictureUrl,
+                )
             )
         )
     }

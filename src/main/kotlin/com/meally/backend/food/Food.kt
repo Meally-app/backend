@@ -1,10 +1,8 @@
 package com.meally.backend.food
 
 import com.meally.backend.common.baseModel.BaseModel
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.Id
+import com.meally.backend.imageResource.ImageResource
+import jakarta.persistence.*
 import java.util.UUID
 
 /*
@@ -15,16 +13,19 @@ import java.util.UUID
 @Entity
 data class Food (
     @Id
-    @GeneratedValue
-    @Column(columnDefinition = "UUID DEFAULT gen_random_uuid()")
+    @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID? = null,
     val name: String,
     val barcode: String,
-    val imageUrl: String?,
     val calories: Double,
     val fat: Double,
     val saturatedFat: Double?,
     val carbs: Double,
     val sugars: Double?,
     val protein: Double,
+
+    @ManyToOne
+    @JoinColumn(name = "image_id")
+    val image: ImageResource? = null,
+
 ) : BaseModel()
