@@ -2,6 +2,7 @@ package com.meally.backend.common.baseModel.openFoodFacts.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.meally.backend.food.Food
+import com.meally.backend.imageResource.ImageResource
 
 data class TestDto(
     val code: String,
@@ -44,12 +45,15 @@ data class NutrimentsDto(
 fun OpenFoodFactsProductDto.toFood() : Food = Food(
     name = product.name,
     barcode = code,
-    imageUrl = product.imageUrl,
     calories = product.nutriments.energyKcal,
     fat = product.nutriments.fatPer100g,
     saturatedFat = product.nutriments.saturatedFatPer100g,
     carbs = product.nutriments.carbsPer100g,
     sugars = product.nutriments.sugarPer100g,
     protein = product.nutriments.proteinPer100g,
+    image = ImageResource(
+        name = "${product.name}_image",
+        resourceUrl = product.imageUrl,
+    )
 )
 

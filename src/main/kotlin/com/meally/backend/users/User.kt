@@ -1,19 +1,15 @@
 package com.meally.backend.users
 
 import com.meally.backend.common.baseModel.BaseModel
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import com.meally.backend.imageResource.ImageResource
+import jakarta.persistence.*
 import java.util.*
 
 @Entity
 @Table(name = "meally_user")
 data class User(
     @Id
-    @GeneratedValue
-    @Column(columnDefinition = "UUID DEFAULT gen_random_uuid()")
+    @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID? = null,
     val externalId: String, // id we receive from firebase
 
@@ -23,5 +19,8 @@ data class User(
     @Column(unique = true)
     val email: String,
 
-    val profilePicUrl: String?,
+    @ManyToOne
+    @JoinColumn(name = "image_id")
+    val profileImage: ImageResource? = null,
+
 ) : BaseModel()
