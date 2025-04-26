@@ -10,11 +10,17 @@ import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
+import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.web.filter.OncePerRequestFilter
 
 class FirebaseAuthenticationFilter(
+    private val publicEndpoints: RequestMatcher,
     private val userService: UserService,
 ) : OncePerRequestFilter() {
+
+    override fun shouldNotFilter(request: HttpServletRequest): Boolean {
+        return publicEndpoints.matches(request)
+    }
 
     override fun doFilterInternal(
         request: HttpServletRequest,
