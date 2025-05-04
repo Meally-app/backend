@@ -1,13 +1,10 @@
 package com.meally.backend.common.baseModel.openFoodFacts.dto
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.meally.backend.food.Food
 import com.meally.backend.imageResource.ImageResource
-
-data class TestDto(
-    val code: String,
-)
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class OpenFoodFactsProductDto(
     val product: ProductDetailsDto,
     val code: String,

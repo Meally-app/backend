@@ -32,7 +32,6 @@ class OpenFoodFactsService {
             logger.info("Error: ${error.toString()}")
         }
 
-
         return result.getOrNull()
     }
 

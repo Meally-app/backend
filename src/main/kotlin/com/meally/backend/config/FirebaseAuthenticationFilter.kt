@@ -35,7 +35,6 @@ class FirebaseAuthenticationFilter(
             try {
                 val decodedToken: FirebaseToken = FirebaseAuth.getInstance().verifyIdToken(token)
                 val uid = decodedToken.uid
-                // Create an authentication object and set it in the SecurityContextHolder
                 val authentication = UsernamePasswordAuthenticationToken(uid, null, emptyList())
                 authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
                 SecurityContextHolder.getContext().authentication = authentication
