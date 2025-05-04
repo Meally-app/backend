@@ -24,7 +24,7 @@ data class Food (
     val sugars: Double?,
     val protein: Double,
 
-    @ManyToOne
+    @OneToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @JoinColumn(name = "image_id")
     val image: ImageResource? = null,
 

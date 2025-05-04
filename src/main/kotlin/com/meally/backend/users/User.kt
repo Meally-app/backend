@@ -19,7 +19,7 @@ data class User(
     @Column(unique = true)
     val email: String,
 
-    @ManyToOne
+    @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "image_id")
     val profileImage: ImageResource? = null,
 

@@ -13,23 +13,16 @@ import java.security.Principal
 @RestController
 class FoodController(
     private val foodService: FoodService,
-    private val authService: AuthService,
-    private val openFoodFactsService: OpenFoodFactsService,
 ) {
 
     @GetMapping("/food")
     fun getAllFood(): List<Food> {
-        println("[TEST] ${authService.getLoggedInUser()}")
         return foodService.getAllFood()
     }
 
-    @GetMapping("/food/{barcode}")
-    fun getFoodByBarcode(@PathVariable barcode: String): Food {
-        return openFoodFactsService.getFood(barcode) ?: throw ResourceNotFoundException
+    @GetMapping("/public/food/{barcode}")
+    fun getFoodByBarcodePublic(@PathVariable barcode: String): Food {
+        return foodService.getFoodByBarcode(barcode)
     }
 
-    @PostMapping("/food")
-    fun insertFood(@RequestBody food: Food): Food {
-        return foodService.insertFood(food)
-    }
 }
