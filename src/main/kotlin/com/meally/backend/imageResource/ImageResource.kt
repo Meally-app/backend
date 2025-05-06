@@ -13,8 +13,6 @@ data class ImageResource(
 
     val name: String? = null,
 
-    val colorHexCode: String? = null,
-
     val resourceUrl: String? = null,
 
 ) : BaseModel()

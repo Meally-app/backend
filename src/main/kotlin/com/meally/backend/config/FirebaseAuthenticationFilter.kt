@@ -3,10 +3,13 @@ package com.meally.backend.config
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseToken
+import com.meally.backend.common.baseModel.openFoodFacts.OpenFoodFactsService
 import com.meally.backend.users.UserService
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
@@ -17,6 +20,8 @@ class FirebaseAuthenticationFilter(
     private val publicEndpoints: RequestMatcher,
     private val userService: UserService,
 ) : OncePerRequestFilter() {
+
+    private val authLogger: Logger = LoggerFactory.getLogger(FirebaseAuthenticationFilter::class.java)
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         return publicEndpoints.matches(request)
@@ -48,6 +53,7 @@ class FirebaseAuthenticationFilter(
 
             } catch (e: FirebaseAuthException) {
                 // Handle invalid token case (e.g., log error or return unauthorized response)
+                authLogger.info("Error occurred: $e")
                 response.status = HttpServletResponse.SC_UNAUTHORIZED
                 return
             }
