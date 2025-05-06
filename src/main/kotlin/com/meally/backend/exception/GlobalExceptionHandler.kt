@@ -16,4 +16,11 @@ class GlobalExceptionHandler {
             HttpStatus.NOT_FOUND
         )
 
+//    @ExceptionHandler(Throwable::class)
+//    fun handleException(): ResponseEntity<String> =
+//        ResponseEntity(
+//            "Something wrong happened",
+//            HttpStatus.INTERNAL_SERVER_ERROR
+//        )
+
 }

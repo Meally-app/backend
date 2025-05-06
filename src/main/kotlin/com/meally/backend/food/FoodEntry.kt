@@ -25,9 +25,7 @@ data class FoodEntry(
     @JoinColumn(name = "meal_type_id", nullable = false)
     val mealType: MealType,
 
-    val amountInGrams: Double,
-
-    val quantity: Double,
+    val amount: Double,
 
     val date: LocalDate,
 

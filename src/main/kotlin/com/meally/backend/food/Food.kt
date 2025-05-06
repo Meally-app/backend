@@ -5,11 +5,6 @@ import com.meally.backend.imageResource.ImageResource
 import jakarta.persistence.*
 import java.util.UUID
 
-/*
-    Represent a Food object
-    if not specified the default unit of measurements is grams per 100g
-        e.g. fat = 8.3 means there is 8.3 grams of fat per 100g of the food
- */
 @Entity
 data class Food (
     @Id
@@ -23,9 +18,21 @@ data class Food (
     val carbs: Double,
     val sugars: Double?,
     val protein: Double,
+    val unitOfMeasurement: UnitOfMeasurement,
 
     @OneToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @JoinColumn(name = "image_id")
     val image: ImageResource? = null,
 
-) : BaseModel()
+) : BaseModel() {
+    enum class UnitOfMeasurement(val abbreviation: String,) {
+        GRAMS("g"), MILLILITERS("ml"), PIECES("pc");
+
+        companion object {
+            fun safeValueOf(value: String) = when (value) {
+                "ml" -> MILLILITERS
+                else -> GRAMS
+            }
+        }
+    }
+}

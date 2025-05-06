@@ -2,10 +2,7 @@ package com.meally.backend.mealType
 
 import com.meally.backend.common.baseModel.BaseModel
 import com.meally.backend.imageResource.ImageResource
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
+import jakarta.persistence.*
 
 @Entity
 data class MealType(
@@ -13,7 +10,7 @@ data class MealType(
     val name: String,
     val orderInDay: Int,
 
-    @ManyToOne
+    @OneToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @JoinColumn(name = "image_id")
     val image: ImageResource? = null,
 ) : BaseModel()
