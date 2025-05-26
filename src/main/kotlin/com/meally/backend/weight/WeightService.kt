@@ -16,7 +16,7 @@ class WeightService(
     fun getUserWeights(from: LocalDate, to: LocalDate): List<WeightDto> {
         val userId = authService.getLoggedInUser()?.id ?: throw ResourceNotFoundException
         // both dates inclusive
-        return weightRepository.findAllByDateLessThanEqualAndDateGreaterThanEqualAndUserId(from, to, userId).map { it.toDto() }
+        return weightRepository.findAllByDateLessThanEqualAndDateGreaterThanEqualAndUserId(to, from, userId).map { it.toDto() }
     }
 
     fun insertWeight(dto: WeightDto): WeightDto {

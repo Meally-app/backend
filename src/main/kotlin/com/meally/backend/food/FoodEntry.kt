@@ -18,8 +18,8 @@ data class FoodEntry(
     val user: User,
 
     @ManyToOne
-    @JoinColumn(name = "food_id", nullable = false)
-    val food: Food,
+    @JoinColumn(name = "food_id", nullable = true)
+    val food: Food?,
 
     @ManyToOne
     @JoinColumn(name = "meal_type_id", nullable = false)
