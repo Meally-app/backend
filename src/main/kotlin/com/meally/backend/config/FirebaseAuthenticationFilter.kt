@@ -3,7 +3,6 @@ package com.meally.backend.config
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseToken
-import com.meally.backend.common.baseModel.openFoodFacts.OpenFoodFactsService
 import com.meally.backend.users.UserService
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest

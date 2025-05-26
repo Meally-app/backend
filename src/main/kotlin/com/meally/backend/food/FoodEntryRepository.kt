@@ -7,4 +7,6 @@ import java.util.UUID
 interface FoodEntryRepository : JpaRepository<FoodEntry, UUID> {
     fun findAllByUserIdAndDate(userId: UUID, date: LocalDate): List<FoodEntry>
 
+    fun findAllByDateLessThanEqualAndDateGreaterThanEqualAndUserId(to: LocalDate, from: LocalDate, userId: UUID?): List<FoodEntry>
+
 }
