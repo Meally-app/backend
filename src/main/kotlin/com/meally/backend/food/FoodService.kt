@@ -1,7 +1,7 @@
 package com.meally.backend.food
 
 import com.meally.backend.auth.AuthService
-import com.meally.backend.common.baseModel.openFoodFacts.OpenFoodFactsService
+import com.meally.backend.common.openFoodFacts.OpenFoodFactsService
 import com.meally.backend.exception.model.ResourceNotFoundException
 import com.meally.backend.food.dto.DiarySummaryDayDto
 import com.meally.backend.food.dto.FoodEntryInsertDto
@@ -35,6 +35,11 @@ class FoodService(
 
     fun searchFood(query: String): List<Food> {
         return foodRepository.searchByNameContaining(query, PageRequest.of(0, 10));
+    }
+
+    fun getRecentFood(): List<Food> {
+        val userId = authService.getLoggedInUser()?.id ?: throw ResourceNotFoundException
+        return foodEntryRepository.findRecentUniqueFoodEntriesByUser(userId).filter { it.food != null }.sortedByDescending { it.createdAt }.map { it.food }.filterNotNull().take(20)
     }
 
     fun insertFoodEntry(dto: FoodEntryInsertDto) : FoodEntry {
