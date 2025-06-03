@@ -13,6 +13,14 @@ data class ActivityEntry(
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID? = null,
 
+    val name: String,
+
+    val date: LocalDate,
+
+    val caloriesBurnt: Double,
+
+    val timeSpent: Long,
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     val user: User,
@@ -21,5 +29,4 @@ data class ActivityEntry(
     @JoinColumn(name = "activity_id", nullable = false)
     val activity: Activity,
 
-    val date: LocalDate
 ) : BaseModel()

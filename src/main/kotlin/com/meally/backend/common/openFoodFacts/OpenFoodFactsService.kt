@@ -1,7 +1,7 @@
-package com.meally.backend.common.baseModel.openFoodFacts
+package com.meally.backend.common.openFoodFacts
 
-import com.meally.backend.common.baseModel.openFoodFacts.dto.OpenFoodFactsProductDto
-import com.meally.backend.common.baseModel.openFoodFacts.dto.toFood
+import com.meally.backend.common.openFoodFacts.dto.OpenFoodFactsProductDto
+import com.meally.backend.common.openFoodFacts.dto.toFood
 import com.meally.backend.food.Food
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

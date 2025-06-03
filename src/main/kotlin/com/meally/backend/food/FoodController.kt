@@ -1,7 +1,7 @@
 package com.meally.backend.food
 
 import com.meally.backend.auth.AuthService
-import com.meally.backend.common.baseModel.openFoodFacts.OpenFoodFactsService
+import com.meally.backend.common.openFoodFacts.OpenFoodFactsService
 import com.meally.backend.exception.model.ResourceNotFoundException
 import com.meally.backend.food.dto.DiarySummaryDayDto
 import com.meally.backend.food.dto.FoodEntryInsertDto
@@ -34,6 +34,11 @@ class FoodController(
     @GetMapping("/public/food/{barcode}")
     fun getFoodByBarcodePublic(@PathVariable barcode: String): ResponseEntity<Food> {
         return ResponseEntity.ok(foodService.getFoodByBarcode(barcode))
+    }
+
+    @GetMapping("/food/recent")
+    fun getRecentFood(): ResponseEntity<List<Food>> {
+        return ResponseEntity.ok(foodService.getRecentFood())
     }
 
     @PostMapping("/food-entry")

@@ -1,4 +1,4 @@
-package com.meally.backend.common.baseModel.openFoodFacts.dto
+package com.meally.backend.common.openFoodFacts.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty

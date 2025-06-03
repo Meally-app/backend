@@ -13,9 +13,7 @@ data class Activity(
 
     val name: String,
 
-    val caloriesBurntPerHour: Double,
-
-    @ManyToOne
+    @OneToOne(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @JoinColumn(name = "image_id")
     val image: ImageResource? = null,
 
