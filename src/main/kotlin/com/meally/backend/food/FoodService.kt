@@ -3,15 +3,13 @@ package com.meally.backend.food
 import com.meally.backend.auth.AuthService
 import com.meally.backend.common.openFoodFacts.OpenFoodFactsService
 import com.meally.backend.exception.model.ResourceNotFoundException
-import com.meally.backend.food.dto.DiarySummaryDayDto
+import com.meally.backend.diary.dto.DiarySummaryDayDto
 import com.meally.backend.food.dto.FoodEntryInsertDto
 import com.meally.backend.mealType.MealTypeRepository
-import org.springframework.cglib.core.Local
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
-import kotlin.jvm.optionals.getOrElse
 import kotlin.jvm.optionals.getOrNull
 
 @Service
@@ -56,27 +54,5 @@ class FoodService(
         )
 
         return foodEntryRepository.save(foodEntry)
-    }
-
-    fun getDiaryByDate(date: LocalDate): List<FoodEntry> {
-        val userId = authService.getLoggedInUser()?.id ?: throw ResourceNotFoundException
-        return foodEntryRepository.findAllByUserIdAndDate(userId, date)
-    }
-
-    fun getDiarySummary(from: LocalDate, to: LocalDate): List<DiarySummaryDayDto> {
-        val userId = authService.getLoggedInUser()?.id ?: throw ResourceNotFoundException
-        val foodList = foodEntryRepository.findAllByDateLessThanEqualAndDateGreaterThanEqualAndUserId(to, from, userId)
-
-        return foodList
-            .groupBy { it.date }
-            .mapValues { (_, entriesOnDate) -> entriesOnDate.sumOf {
-                it.food?.let { food ->
-                    food.calories * it.amount / 100
-                } ?: it.amount
-            } }
-            .map { DiarySummaryDayDto(
-                date = it.key,
-                calories = it.value,
-            ) }
     }
 }

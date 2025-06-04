@@ -35,6 +35,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("me.paulschwarz:spring-dotenv:3.0.0")
 	implementation("com.google.firebase:firebase-admin:9.2.0")
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("org.postgresql:postgresql")

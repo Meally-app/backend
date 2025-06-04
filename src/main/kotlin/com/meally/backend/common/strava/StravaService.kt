@@ -1,7 +1,12 @@
 package com.meally.backend.common.strava
 
+import com.meally.backend.activity.ActivityEntry
+import com.meally.backend.activity.ActivityEntryRepository
+import com.meally.backend.activity.ActivityRepository
 import com.meally.backend.auth.AuthService
 import com.meally.backend.common.openFoodFacts.OpenFoodFactsService
+import com.meally.backend.common.strava.dto.StravaActivityDetailsDto
+import com.meally.backend.common.strava.dto.StravaActivitySummaryDto
 import com.meally.backend.exception.model.ResourceNotFoundException
 import com.meally.backend.exception.model.ThirdPartyAuthError
 import com.meally.backend.thirdPartyToken.ThirdPartyToken
@@ -10,17 +15,26 @@ import com.meally.backend.thirdPartyToken.ThirdPartyTokenRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cglib.core.Local
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClient
+import org.threeten.bp.ZoneId
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import kotlin.math.max
 
 @Service
 class StravaService (
     private val authService: AuthService,
+    private val activityEntryRepository: ActivityEntryRepository,
     private val thirdPartyTokenRepository: ThirdPartyTokenRepository,
+    private val activityRepository: ActivityRepository,
 ){
     private val logger: Logger = LoggerFactory.getLogger(OpenFoodFactsService::class.java)
 
@@ -34,6 +48,52 @@ class StravaService (
     private val restClient = RestClient.builder()
         .baseUrl("https://www.strava.com")
         .build()
+
+    fun syncStrava(date: LocalDate) {
+        val user = authService.getLoggedInUser() ?: throw ResourceNotFoundException
+        val userId = user.id ?: throw ResourceNotFoundException
+        val cachedEntries = activityEntryRepository.findAllByUserIdAndDateAfterAndDateBefore(userId, date.minusWeeks(4), date)
+
+        val shouldSync = cachedEntries.isEmpty() || cachedEntries.firstOrNull {
+            it.lastSyncedAt.isBefore(LocalDateTime.now().minusDays(1))
+        } != null
+
+        if (!shouldSync) return
+        logger.info("Syncing strava activities, user: ${user.email}, date: $date")
+
+        val dateInstant = Instant.ofEpochSecond(date.plusDays(1).atTime(23, 59).toEpochSecond(ZoneOffset.UTC))
+        val freshActivities = getAllActivities(
+            from = dateInstant.minusSeconds(60 * 60 * 24 * 7 * 4), // fetch for last 4 weeks
+            to = dateInstant,
+        )
+
+        val allActivities = activityRepository.findAll()
+        val unknownActivity = allActivities.find { it.name.equals("unknown", ignoreCase = true) } ?: run { logger.info("Error fetching unknown activity"); return }
+
+        val freshDetails = freshActivities
+            .asSequence()
+            .map {
+                runCatching { getActivityDetails(it.id.toString()) }
+            }
+            .mapNotNull { it.getOrNull() }
+            .map { stravaActivity ->
+                ActivityEntry(
+                    id = cachedEntries.firstOrNull { stravaActivity.id.toString() == it.externalId }?.id,
+                    user = user,
+                    date = stravaActivity.startDateLocal.atZone(ZoneOffset.UTC).toLocalDate(),
+                    name = stravaActivity.name,
+                    timeSpent = stravaActivity.elapsedTime,
+                    caloriesBurnt = stravaActivity.calories,
+                    externalId = stravaActivity.id.toString(),
+                    activity = allActivities.find { it.name.equals(stravaActivity.sportType, ignoreCase = true) } ?: unknownActivity,
+                    lastSyncedAt = LocalDateTime.now(),
+                )
+            }
+            .toList()
+
+        activityEntryRepository.saveAll(freshDetails)
+
+    }
 
     fun exchangeCodeForToken(code: String): ThirdPartyToken {
         val user = authService.getLoggedInUser() ?: throw ResourceNotFoundException
@@ -49,13 +109,35 @@ class StravaService (
         )
     }
 
-    fun getAllActivities(): String? = makeStravaApiCall { accessToken ->
+    fun getAllActivities(from: Instant, to: Instant): List<StravaActivitySummaryDto> = makeStravaApiCall { accessToken ->
         val result = runCatching {
             restClient.get()
-                .uri("/api/v3/activities")
+                .uri { builder ->
+                    builder.path("/api/v3/activities")
+                        .queryParam("after", from.epochSecond)
+                        .queryParam("before", to.epochSecond)
+                        .build()
+                }
                 .header("Authorization", "Bearer $accessToken")
                 .retrieve()
-                .body(String::class.java)
+                .body(object : ParameterizedTypeReference<List<StravaActivitySummaryDto>>() {})
+        }
+
+        if (result.isFailure) {
+            val error = result.exceptionOrNull()
+            logger.info("Error: $error")
+        }
+
+        result.getOrNull() ?: listOf()
+    }
+
+    fun getActivityDetails(id: String): StravaActivityDetailsDto? = makeStravaApiCall { accessToken ->
+        val result = runCatching {
+            restClient.get()
+                .uri("/api/v3/activities/" + id)
+                .header("Authorization", "Bearer $accessToken")
+                .retrieve()
+                .body(StravaActivityDetailsDto::class.java)
         }
 
         if (result.isFailure) {
