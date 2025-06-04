@@ -1,4 +1,4 @@
-package com.meally.backend.food.dto
+package com.meally.backend.diary.dto
 
 import java.time.LocalDate
 

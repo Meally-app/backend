@@ -1,11 +1,7 @@
 package com.meally.backend.food
 
-import com.meally.backend.auth.AuthService
-import com.meally.backend.common.openFoodFacts.OpenFoodFactsService
-import com.meally.backend.exception.model.ResourceNotFoundException
-import com.meally.backend.food.dto.DiarySummaryDayDto
+import com.meally.backend.diary.dto.DiarySummaryDayDto
 import com.meally.backend.food.dto.FoodEntryInsertDto
-import org.springframework.data.jpa.repository.Query
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -13,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.security.Principal
 import java.time.LocalDate
 
 @RestController
@@ -44,18 +39,5 @@ class FoodController(
     @PostMapping("/food-entry")
     fun insertFoodEntry(@RequestBody dto: FoodEntryInsertDto): ResponseEntity<FoodEntry> {
         return ResponseEntity.ok(foodService.insertFoodEntry(dto))
-    }
-
-    @GetMapping("/diary")
-    fun getFoodDiary(@RequestParam("date") date: LocalDate = LocalDate.now()): ResponseEntity<List<FoodEntry>> {
-        return ResponseEntity.ok(foodService.getDiaryByDate(date))
-    }
-
-    @GetMapping("/diary/summary")
-    fun getDiarySummary(
-        @RequestParam("from") from: LocalDate,
-        @RequestParam("to") to: LocalDate,
-    ): ResponseEntity<List<DiarySummaryDayDto>> {
-        return ResponseEntity.ok(foodService.getDiarySummary(from, to))
     }
 }

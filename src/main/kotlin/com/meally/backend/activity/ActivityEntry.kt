@@ -5,6 +5,7 @@ import com.meally.backend.food.Food
 import com.meally.backend.users.User
 import jakarta.persistence.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 @Entity
@@ -12,6 +13,8 @@ data class ActivityEntry(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID? = null,
+
+    val externalId: String,
 
     val name: String,
 
@@ -28,5 +31,7 @@ data class ActivityEntry(
     @ManyToOne
     @JoinColumn(name = "activity_id", nullable = false)
     val activity: Activity,
+
+    val lastSyncedAt: LocalDateTime,
 
 ) : BaseModel()
