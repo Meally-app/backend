@@ -10,6 +10,7 @@ import com.meally.backend.food.FoodEntry
 import com.meally.backend.food.FoodEntryRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -23,6 +24,7 @@ class DiaryService(
 
     suspend fun getDiaryByDate(date: LocalDate): DiaryForDayDto = coroutineScope {
         val userId = authService.getLoggedInUser()?.id ?: throw ResourceNotFoundException
+        launch { stravaService.syncStrava(date) }
         val food = async { foodEntryRepository.findAllByUserIdAndDate(userId, date) }
         val activity = async { activityEntryRepository.findAllByUserIdAndDate(userId, date) }
 

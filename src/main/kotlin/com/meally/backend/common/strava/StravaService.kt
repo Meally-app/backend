@@ -4,7 +4,6 @@ import com.meally.backend.activity.ActivityEntry
 import com.meally.backend.activity.ActivityEntryRepository
 import com.meally.backend.activity.ActivityRepository
 import com.meally.backend.auth.AuthService
-import com.meally.backend.common.openFoodFacts.OpenFoodFactsService
 import com.meally.backend.common.strava.dto.StravaActivityDetailsDto
 import com.meally.backend.common.strava.dto.StravaActivitySummaryDto
 import com.meally.backend.exception.model.ResourceNotFoundException
@@ -15,19 +14,16 @@ import com.meally.backend.thirdPartyToken.ThirdPartyTokenRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.cglib.core.Local
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClient
-import org.threeten.bp.ZoneId
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import kotlin.math.max
 
 @Service
 class StravaService (
@@ -36,7 +32,7 @@ class StravaService (
     private val thirdPartyTokenRepository: ThirdPartyTokenRepository,
     private val activityRepository: ActivityRepository,
 ){
-    private val logger: Logger = LoggerFactory.getLogger(OpenFoodFactsService::class.java)
+    private val logger: Logger = LoggerFactory.getLogger(StravaService::class.java)
 
     @Value("\${strava.client-id}")
     private var clientId: String = ""
@@ -52,9 +48,17 @@ class StravaService (
     fun syncStrava(date: LocalDate) {
         val user = authService.getLoggedInUser() ?: throw ResourceNotFoundException
         val userId = user.id ?: throw ResourceNotFoundException
-        val cachedEntries = activityEntryRepository.findAllByUserIdAndDateAfterAndDateBefore(userId, date.minusWeeks(4), date)
+        val isAuthorizedOnStrava = thirdPartyTokenRepository.findByUserIdAndProvider(userId, ThirdPartyTokenProvider.STRAVA) != null
 
-        val shouldSync = cachedEntries.isEmpty() || cachedEntries.firstOrNull {
+        if (!isAuthorizedOnStrava) return
+
+        val allEntries = activityEntryRepository.findAll()
+        val checkForSyncEntries = allEntries.filter {
+            it.date.isAfter(date.minusWeeks(4)) &&
+                it.date.isBefore(date.plusDays(1))
+        }
+
+        val shouldSync = checkForSyncEntries.isEmpty() || checkForSyncEntries.firstOrNull {
             it.lastSyncedAt.isBefore(LocalDateTime.now().minusDays(1))
         } != null
 
@@ -78,7 +82,7 @@ class StravaService (
             .mapNotNull { it.getOrNull() }
             .map { stravaActivity ->
                 ActivityEntry(
-                    id = cachedEntries.firstOrNull { stravaActivity.id.toString() == it.externalId }?.id,
+                    id = allEntries.firstOrNull { stravaActivity.id.toString() == it.externalId }?.id,
                     user = user,
                     date = stravaActivity.startDateLocal.atZone(ZoneOffset.UTC).toLocalDate(),
                     name = stravaActivity.name,
