@@ -21,9 +21,10 @@ class DiaryService(
 ) {
 
     suspend fun getDiaryByDate(date: LocalDate): DiaryForDayDto = coroutineScope {
-        val userId = authService.getLoggedInUser()?.id ?: throw ResourceNotFoundException
+        val user = authService.getLoggedInUser() ?: throw ResourceNotFoundException
+        val userId = user.id ?: throw ResourceNotFoundException
         CoroutineScope(Dispatchers.Default).launch {
-            stravaService.syncStrava(date)
+            stravaService.syncStrava(date, user)
         }
         val food = async { foodEntryRepository.findAllByUserIdAndDate(userId, date) }
         val activity = async { activityEntryRepository.findAllByUserIdAndDate(userId, date) }

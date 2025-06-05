@@ -2,6 +2,8 @@ package com.meally.backend.common.strava
 
 import com.meally.backend.activity.ActivityEntry
 import com.meally.backend.activity.ActivityService
+import com.meally.backend.auth.AuthService
+import com.meally.backend.exception.model.ResourceNotFoundException
 import jakarta.servlet.http.HttpSession
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -18,6 +20,7 @@ import java.time.LocalDate
 class StravaController(
     private val stravaService: StravaService,
     private val activityService: ActivityService,
+    private val authService: AuthService,
 ) {
 
     @GetMapping("/public/strava/auth/android")
@@ -40,7 +43,8 @@ class StravaController(
 
     @GetMapping("/strava/sync")
     fun syncStravaActivities(@RequestParam("date") date: LocalDate): ResponseEntity<List<ActivityEntry>> {
-        stravaService.syncStrava(date)
+        val user = authService.getLoggedInUser() ?: throw ResourceNotFoundException
+        stravaService.syncStrava(date, user)
         return ResponseEntity.ok(activityService.getUserActivityEntries())
     }
 }
