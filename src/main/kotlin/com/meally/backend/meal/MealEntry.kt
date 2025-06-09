@@ -1,6 +1,5 @@
-package com.meally.backend.food
+package com.meally.backend.meal
 
-import com.meally.backend.common.baseModel.BaseModel
 import com.meally.backend.mealType.MealType
 import com.meally.backend.users.User
 import jakarta.persistence.*
@@ -8,7 +7,7 @@ import java.time.LocalDate
 import java.util.*
 
 @Entity
-data class FoodEntry(
+data class MealEntry(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID? = null,
@@ -18,8 +17,8 @@ data class FoodEntry(
     val user: User,
 
     @ManyToOne
-    @JoinColumn(name = "food_id", nullable = true)
-    val food: Food?, // nullable to allow manual food entry, in that case amount == calories
+    @JoinColumn(name = "meal_id", nullable = true)
+    val meal: Meal,
 
     @ManyToOne
     @JoinColumn(name = "meal_type_id", nullable = false)
@@ -28,9 +27,7 @@ data class FoodEntry(
     val amount: Double,
 
     val date: LocalDate,
+)
 
-) : BaseModel()
+fun MealEntry.getCalories(): Double = amount * meal.foodInMeal.sumOf { it.food.calories * it.amount / 100 }
 
-fun FoodEntry.getCalories(): Double = food?.let { food ->
-    food.calories * amount / 100
-} ?: amount

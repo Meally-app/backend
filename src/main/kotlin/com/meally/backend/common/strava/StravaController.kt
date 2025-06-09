@@ -37,7 +37,8 @@ class StravaController(
     fun exchangeCodeAndStoreToken(
         @RequestParam code: String,
     ): ResponseEntity<*> {
-        stravaService.exchangeCodeForToken(code)
+        val user = authService.getLoggedInUser() ?: throw ResourceNotFoundException
+        stravaService.exchangeCodeForToken(code, user)
         return ResponseEntity.ok().build<Any>()
     }
 

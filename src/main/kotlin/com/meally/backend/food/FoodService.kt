@@ -37,7 +37,14 @@ class FoodService(
 
     fun getRecentFood(): List<Food> {
         val userId = authService.getLoggedInUser()?.id ?: throw ResourceNotFoundException
-        return foodEntryRepository.findRecentUniqueFoodEntriesByUser(userId).filter { it.food != null }.sortedByDescending { it.createdAt }.map { it.food }.filterNotNull().take(20)
+        return foodEntryRepository.findRecentUniqueFoodEntriesByUser(userId)
+            .asSequence()
+            .filter { it.food != null }
+            .sortedByDescending { it.createdAt }
+            .map { it.food }
+            .filterNotNull()
+            .take(20)
+            .toList()
     }
 
     fun insertFoodEntry(dto: FoodEntryInsertDto) : FoodEntry {

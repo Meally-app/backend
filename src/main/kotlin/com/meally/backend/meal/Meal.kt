@@ -18,16 +18,15 @@ data class Meal(
     @JoinColumn(name = "user_id", nullable = false)
     val user: User,
 
-    @ManyToOne
-    @JoinColumn(name = "meal_type", nullable = false)
-    val mealType: MealType,
-
-    @OneToMany(mappedBy = "meal", cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "meal", cascade = [CascadeType.ALL], orphanRemoval = true)
     val foodInMeal: List<FoodInMeal>,
 
+    @Enumerated(value = EnumType.STRING)
     val status: MealVisibility,
 
-    ) : BaseModel()
+) : BaseModel()
+
+fun Meal.getCalories() = foodInMeal.sumOf { it.amount * it.food.calories / 100 }
 
 enum class MealVisibility {
     PRIVATE, PUBLIC

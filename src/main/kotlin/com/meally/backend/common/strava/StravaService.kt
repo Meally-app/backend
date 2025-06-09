@@ -28,7 +28,6 @@ import java.time.ZoneOffset
 
 @Service
 class StravaService (
-    private val authService: AuthService,
     private val activityEntryRepository: ActivityEntryRepository,
     private val thirdPartyTokenRepository: ThirdPartyTokenRepository,
     private val activityRepository: ActivityRepository,
@@ -100,8 +99,7 @@ class StravaService (
 
     }
 
-    fun exchangeCodeForToken(code: String): ThirdPartyToken {
-        val user = authService.getLoggedInUser() ?: throw ResourceNotFoundException
+    fun exchangeCodeForToken(code: String, user: User): ThirdPartyToken {
         val tokenInfo = getStravaAuthData(code, StravaGrantType.AUTHORIZATION_CODE)
         return thirdPartyTokenRepository.save(
             ThirdPartyToken(
@@ -153,8 +151,7 @@ class StravaService (
         result.getOrNull()
     }
 
-    private fun refreshToken(): ThirdPartyToken {
-        val user = authService.getLoggedInUser() ?: throw ResourceNotFoundException
+    private fun refreshToken(user: User): ThirdPartyToken {
         val userId = user.id ?: throw ResourceNotFoundException
         val tokenData = thirdPartyTokenRepository.findByUserIdAndProvider(userId, ThirdPartyTokenProvider.STRAVA) ?: throw ResourceNotFoundException
         val newAuthData = getStravaAuthData(tokenData.refreshToken, StravaGrantType.REFRESH_TOKEN)
@@ -205,7 +202,7 @@ class StravaService (
 
         return if (tokenData.expiresAt.isBefore(Instant.now())) {
             logger.info("Access token expired for user ${user.email}")
-            block(refreshToken().accessToken)
+            block(refreshToken(user).accessToken)
         } else {
             block(tokenData.accessToken)
         }

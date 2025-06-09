@@ -8,6 +8,10 @@ import com.meally.backend.diary.dto.DiarySummaryDayDto
 import com.meally.backend.exception.model.ResourceNotFoundException
 import com.meally.backend.food.FoodEntry
 import com.meally.backend.food.FoodEntryRepository
+import com.meally.backend.food.getCalories
+import com.meally.backend.meal.MealEntry
+import com.meally.backend.meal.MealEntryRepository
+import com.meally.backend.meal.getCalories
 import kotlinx.coroutines.*
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -18,6 +22,7 @@ class DiaryService(
     private val foodEntryRepository: FoodEntryRepository,
     private val activityEntryRepository: ActivityEntryRepository,
     private val stravaService: StravaService,
+    private val mealEntryRepository: MealEntryRepository,
 ) {
 
     suspend fun getDiaryByDate(date: LocalDate): DiaryForDayDto = coroutineScope {
@@ -27,29 +32,41 @@ class DiaryService(
             stravaService.syncStrava(date, user)
         }
         val food = async { foodEntryRepository.findAllByUserIdAndDate(userId, date) }
+        val meals = async { mealEntryRepository.findAllByUserIdAndDate(userId, date) }
         val activity = async { activityEntryRepository.findAllByUserIdAndDate(userId, date) }
 
         DiaryForDayDto(
             goalCalories = 2000,
             food = food.await(),
             exercise = activity.await(),
+            meals = meals.await(),
         )
     }
 
     fun getDiarySummary(from: LocalDate, to: LocalDate): List<DiarySummaryDayDto> {
         val userId = authService.getLoggedInUser()?.id ?: throw ResourceNotFoundException
-        val foodList = foodEntryRepository.findAllByDateLessThanEqualAndDateGreaterThanEqualAndUserId(to, from, userId)
+        val calorieMap = mutableMapOf<LocalDate, Double>()
 
-        return foodList
-            .groupBy { it.date }
-            .mapValues { (_, entriesOnDate) -> entriesOnDate.sumOf {
-                it.food?.let { food ->
-                    food.calories * it.amount / 100
-                } ?: it.amount
-            } }
-            .map { DiarySummaryDayDto(
-                date = it.key,
-                calories = it.value,
-            ) }
+        foodEntryRepository
+            .findAllByDateLessThanEqualAndDateGreaterThanEqualAndUserId(to, from, userId)
+            .forEach { foodEntry ->
+                val caloriesForDate = calorieMap[foodEntry.date] ?: 0.0
+                calorieMap[foodEntry.date] = caloriesForDate + foodEntry.getCalories()
+            }
+
+        mealEntryRepository
+            .findAllByDateLessThanEqualAndDateGreaterThanEqualAndUserId(to, from, userId)
+            .forEach { mealEntry ->
+                val caloriesForDate = calorieMap[mealEntry.date] ?: 0.0
+                calorieMap[mealEntry.date] = caloriesForDate + mealEntry.getCalories()
+            }
+
+        return calorieMap
+            .map {
+                DiarySummaryDayDto(
+                    date = it.key,
+                    calories = it.value,
+                )
+            }
     }
 }
