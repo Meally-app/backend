@@ -7,4 +7,5 @@ data class BrowseMealDto(
     val name: String,
     val calories: Double,
     val user: User,
+    val isLiked: Boolean,
 )
