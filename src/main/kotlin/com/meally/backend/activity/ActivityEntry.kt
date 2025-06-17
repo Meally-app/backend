@@ -14,6 +14,7 @@ data class ActivityEntry(
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID? = null,
 
+    @Column(unique = true)
     val externalId: String,
 
     val name: String,
