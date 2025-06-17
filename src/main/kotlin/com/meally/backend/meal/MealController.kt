@@ -24,7 +24,7 @@ class MealController(
         @RequestParam("query") query: String = "",
         @RequestParam("caloriesMax") caloriesMax: Double = Double.MAX_VALUE,
         @RequestParam("caloriesMin") caloriesMin: Double = Double.MIN_VALUE,
-        @RequestParam("onlyFavorites") onlyFavorites: Boolean = false,
+        @RequestParam("showOnlyLiked") onlyFavorites: Boolean,
     ): ResponseEntity<List<BrowseMealDto>> {
         return ResponseEntity.ok(mealService.browseMeals(query, caloriesMin, caloriesMax, onlyFavorites))
     }

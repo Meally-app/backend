@@ -53,6 +53,7 @@ class FoodService(
         val mealType = mealTypeRepository.findByName(dto.mealType) ?: throw ResourceNotFoundException
 
         val foodEntry = FoodEntry(
+            id = dto.foodEntryId,
             user = user,
             food = food,
             mealType = mealType,
